@@ -52,7 +52,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
-	if err != nil{
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -81,6 +81,7 @@ func (p *Page) save() error {
 	// 0600 is permission settings, 0600 is permission which your own is permitted.
 	return ioutil.WriteFile(filename, p.Body, 0600)
 }
+
 
 // load file name from texttitle and return new Page pointer
 func loadPage(title string) (*Page, error) {
