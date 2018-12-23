@@ -15,6 +15,21 @@ type Page struct {
 // set path address and get string length
 const lenPath = len("/view/")
 
+// make array of template file
+ var templates = make(map[string]*template.Template)
+
+// initialize function which is executed before main function
+func init(){
+	for _, tmpl := range []string{"edit","view"}{
+		// if error, Must function generates panic so, there's no err description.
+		t := template.Must(template.ParseFiles(tmpl + ".html"))
+		templates[tmpl] = t
+
+	}
+}
+
+
+
 // response handler
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[lenPath:]
@@ -60,15 +75,9 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	// read external file (edit.html) by template package of golang
-	t, err := template.ParseFiles(tmpl + ".html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	// Embedd　Title, Body　to edit.html
-	err = t.Execute(w, p)
+	err := templates[tmpl].Execute(w, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -81,7 +90,6 @@ func (p *Page) save() error {
 	// 0600 is permission settings, 0600 is permission which your own is permitted.
 	return ioutil.WriteFile(filename, p.Body, 0600)
 }
-
 
 // load file name from texttitle and return new Page pointer
 func loadPage(title string) (*Page, error) {
